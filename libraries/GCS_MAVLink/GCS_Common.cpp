@@ -29,7 +29,10 @@
 #include <fcntl.h>
 #endif
 
+//#include "Copter.h"
 extern const AP_HAL::HAL& hal;
+
+//extern Copter copter;
 
 uint32_t GCS_MAVLINK::last_radio_status_remrssi_ms;
 uint8_t GCS_MAVLINK::mavlink_active = 0;
@@ -747,6 +750,8 @@ void GCS_MAVLINK::packetReceived(const mavlink_status_t &status,
     if (msg_snoop != nullptr) {
         msg_snoop(&msg);
     }
+    
+    //copter.gcs_send_text_fmt(MAV_SEVERITY_INFO,"checking msg, sysid=%d, compid=%d",msg->sysid,msg->compid);
     if (routing.check_and_forward(chan, &msg) &&
         accept_packet(status, msg)) {
         handleMessage(&msg);
@@ -792,6 +797,7 @@ GCS_MAVLINK::update(run_cli_fn run_cli, uint32_t max_time_us)
         // Try to get a new message
         if (mavlink_parse_char(chan, c, &msg, &status)) {
             hal.util->perf_begin(_perf_packet);
+            //hal.console->printf("mylog: parse and start check\n");
             packetReceived(status, msg);
             hal.util->perf_end(_perf_packet);
             parsed_packet = true;

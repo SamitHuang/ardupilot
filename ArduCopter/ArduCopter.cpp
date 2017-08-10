@@ -103,6 +103,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(three_hz_loop,          3,     75),
     SCHED_TASK(compass_accumulate,   100,    100),
     SCHED_TASK(barometer_accumulate,  50,     90),
+    SCHED_TASK(TX1_send_loop,         1,     100),
 #if PRECISION_LANDING == ENABLED
     SCHED_TASK(update_precland,      400,     50),
 #endif
@@ -185,6 +186,17 @@ void Copter::compass_accumulate(void)
 {
     if (g.compass_enabled) {
         compass.accumulate();
+    }
+}
+
+void Copter::TX1_send_loop()
+{
+    if (gcs_chan[2].initialised) {
+        //gcs[2].TX1_data_stream_send();
+        //gcs_chan[2].send_message(MSG_RAW_IMU1);
+        //gcs_send_text(MAV_SEVERITY_INFO, "Come to TX1 send loop");
+        //gcs_send_text_fmt(MAV_SEVERITY_INFO, "TX1 test time %d",12);
+        //hal.console->printf("mylog: check log\n");
     }
 }
 

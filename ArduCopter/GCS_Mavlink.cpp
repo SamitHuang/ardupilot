@@ -827,11 +827,28 @@ void GCS_MAVLINK_Copter::packetReceived(const mavlink_status_t &status,
     GCS_MAVLINK::packetReceived(status, msg);
 }
 
+void GCS_MAVLINK::TX1_data_stream_send(void){
+    send_message(MSG_RAW_IMU1);
+    send_message(MSG_ATTITUDE);
+    send_message(MSG_LOCATION);
+}
+
+
 void GCS_MAVLINK_Copter::handleMessage(mavlink_message_t* msg)
 {
     uint8_t result = MAV_RESULT_FAILED;         // assume failure.  Each messages id is responsible for return ACK or NAK if required
 
     switch (msg->msgid) {
+
+    case MAVLINK_MSG_ID_VISION_SPEED_ESTIMATE:
+    {
+        mavlink_vision_speed_estimate_t speed;
+        mavlink_msg_vision_speed_estimate_decode(msg, &speed);
+        copter.gcs_send_text_fmt(MAV_SEVERITY_INFO,"vision speed x=%.3f, y=%.3f", speed.x, speed.y);
+        //printf("%d", speed.x);
+        break;
+    }
+
 
     case MAVLINK_MSG_ID_HEARTBEAT:      // MAV ID: 0
     {

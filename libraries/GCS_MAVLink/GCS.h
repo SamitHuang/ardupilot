@@ -88,6 +88,7 @@ public:
     void        init(AP_HAL::UARTDriver *port, mavlink_channel_t mav_chan);
     void        setup_uart(const AP_SerialManager& serial_manager, AP_SerialManager::SerialProtocol protocol, uint8_t instance);
     void        send_message(enum ap_message id);
+    void        TX1_data_stream_send(void);
     void        send_text(MAV_SEVERITY severity, const char *str);
     virtual void        data_stream_send(void) = 0;
     void        queued_param_send();
@@ -137,6 +138,7 @@ public:
     uint16_t mission_item_reached_index = AP_MISSION_CMD_INDEX_NONE;
 
     // common send functions
+
     void send_meminfo(void);
     void send_power_status(void);
     void send_battery_status(const AP_BattMonitor &battery, const uint8_t instance) const;
