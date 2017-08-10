@@ -1,0 +1,6 @@
+2017-08-10
+ArduCopter/ArduCopter.cpp
+ArduCopter/Copter.h
+ArduCopter/GCS_Mavlink.cpp
+libraries/GCS_MAVLink/GCS.h
+libraries/GCS_MAVLink/GCS_Common.cpp
