@@ -816,6 +816,15 @@ void AC_PosControl::pos_to_rate_xy(xy_mode mode, float dt, float ekfNavVelGainSc
     float linear_distance;      // the distance we swap between linear and sqrt velocity response
     float kP = ekfNavVelGainScaler * _p_pos_xy.kP(); // scale gains to compensate for noisy optical flow measurement in the EKF
 
+    if (mode == XY_MODE_POS_AND_VEL_FF) {
+        // add velocity feed-forward
+        _vel_target.x += _vel_desired.x;
+        _vel_target.y += _vel_desired.y;
+
+        return;
+
+    }
+
     // avoid divide by zero
     if (kP <= 0.0f) {
         _vel_target.x = 0.0f;

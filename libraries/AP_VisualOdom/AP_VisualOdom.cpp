@@ -19,6 +19,7 @@
 
 extern const AP_HAL::HAL &hal;
 
+
 // table of user settable parameters
 const AP_Param::GroupInfo AP_VisualOdom::var_info[] = {
 
@@ -102,4 +103,60 @@ void AP_VisualOdom::handle_msg(mavlink_message_t *msg)
         _driver->handle_msg(msg);
     }
 }
+
+/*
+bool AP_VisualOdom::is_lost() {
+    if(AP_HAL::millis() - _raw_state.last_update_ms < 500)
+        return true;
+    else
+        return false;
+    //todo: add counter
+}
+*/
+
+//save new vio message to _raw_state
+void AP_VisualOdom::save_vio_state(mavlink_message_t *msg){
+    mavlink_vision_position_delta_t packet;
+
+    mavlink_msg_vision_position_delta_decode(msg, &packet);
+    //check if confidence 
+    
+    const Vector3f angle_delta(packet.angle_delta[0], packet.angle_delta[1], packet.angle_delta[2]);
+    const Vector3f position_delta(packet.position_delta[0], packet.position_delta[1], packet.position_delta[2]);
+    _raw_state.angle_delta = angle_delta;
+    //_state.angle_delta.rotate((enum Rotation)_frontend._orientation.get());
+    // rotate and store position_delta
+    _raw_state.position_delta = position_delta;
+    //_frontend._state.position_delta.rotate((enum Rotation)_frontend._orientation.get());
+    _raw_state.time_delta_usec = packet.time_delta_usec;
+    _raw_state.confidence = packet.confidence;
+    _raw_state.last_update_ms = AP_HAL::millis();
+}
+
+VisualOdomState_t AP_VisualOdom::get_vio_state(){
+    return _raw_state;
+}
+
+//get velocity in the head-forward-right frame from the vio state  
+bool AP_VisualOdom::calc_vel_xy(float &vel_fw, float &vel_rg){
+    /*
+    Vector3f vel;
+    Matrix3f dcm;
+
+    if(_raw_state.confidence < 50 )
+        return false;
+
+    //rotate to forward-horizon frame
+    Vector3f vel_fw_rg;
+    vel = _raw_state.position_delta * (1000000.0f/_raw_state.time_delta_usec);
+    dcm.from_euler(ahrs.roll, ahrs.pitch, 0);
+    vel_fw_rg = dcm * vel;
+
+    vel_fw = vel_fw_rg.x;
+    vel_rg = vel_fw_rg.y;
+    */
+    return true;
+}
+
+
 

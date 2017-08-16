@@ -24,6 +24,15 @@ class AP_VisualOdom_Backend;
 
 #define AP_VISUALODOM_TIMEOUT_MS 300
 
+// The VisualOdomState structure is filled in by the backend driver
+typedef struct VisualOdomState {
+    Vector3f angle_delta;       // attitude delta (in radians) of most recent update
+    Vector3f position_delta;    // position delta (in meters) of most recent update
+    uint64_t time_delta_usec;   // time delta (in usec) between previous and most recent update
+    float confidence;           // confidence expressed as a value from 0 (no confidence) to 100 (very confident)
+    uint32_t last_update_ms;    // system time (in milliseconds) of last update from sensor
+}VisualOdomState_t;
+
 class AP_VisualOdom
 {
 public:
@@ -37,14 +46,7 @@ public:
         AP_VisualOdom_Type_MAV    = 1
     };
 
-    // The VisualOdomState structure is filled in by the backend driver
-    struct VisualOdomState {
-        Vector3f angle_delta;       // attitude delta (in radians) of most recent update
-        Vector3f position_delta;    // position delta (in meters) of most recent update
-        uint64_t time_delta_usec;   // time delta (in usec) between previous and most recent update
-        float confidence;           // confidence expressed as a value from 0 (no confidence) to 100 (very confident)
-        uint32_t last_update_ms;    // system time (in milliseconds) of last update from sensor
-    };
+
 
     // detect and initialise any sensors
     void init();
@@ -68,6 +70,12 @@ public:
     // consume VISUAL_POSITION_DELTA data from MAVLink messages
     void handle_msg(mavlink_message_t *msg);
 
+    void save_vio_state(mavlink_message_t *msg);
+
+    VisualOdomState get_vio_state();
+
+    bool calc_vel_xy(float &vel_fw, float &vel_rg);
+
     static const struct AP_Param::GroupInfo var_info[];
 
 private:
@@ -82,4 +90,5 @@ private:
 
     // state of backend
     VisualOdomState _state;
+    VisualOdomState_t _raw_state;
 };

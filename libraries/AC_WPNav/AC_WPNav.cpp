@@ -251,6 +251,7 @@ void AC_WPNav::calc_loiter_desired_velocity(float nav_dt, float ekfGndSpdLimit)
     _pos_control.set_jerk_xy(_loiter_jerk_max_cmsss);
 
     // rotate pilot input to lat/lon frame
+    // RC_input_pitch -> _pilot_accel_fwd_cms, RC_input_roll -> pilot_accel_rgt_cms
     Vector2f desired_accel;
     desired_accel.x = (_pilot_accel_fwd_cms*_ahrs.cos_yaw() - _pilot_accel_rgt_cms*_ahrs.sin_yaw());
     desired_accel.y = (_pilot_accel_fwd_cms*_ahrs.sin_yaw() + _pilot_accel_rgt_cms*_ahrs.cos_yaw());
@@ -268,9 +269,11 @@ void AC_WPNav::calc_loiter_desired_velocity(float nav_dt, float ekfGndSpdLimit)
     }
     
     // adjust the desired acceleration
+    // in normal cases(in range), _loiter_desired_accel = desired_accel, it's in the earth frame
     _loiter_desired_accel += des_accel_diff;
 
     // get pos_control's feed forward velocity
+    // _vel_desired, the previous desired velocity
     const Vector3f &desired_vel_3d = _pos_control.get_desired_velocity();
     Vector2f desired_vel(desired_vel_3d.x,desired_vel_3d.y);
 
@@ -278,11 +281,12 @@ void AC_WPNav::calc_loiter_desired_velocity(float nav_dt, float ekfGndSpdLimit)
     desired_vel.x += _loiter_desired_accel.x * nav_dt;
     desired_vel.y += _loiter_desired_accel.y * nav_dt;
 
+    // the vector length of vel
     float desired_speed = desired_vel.length();
 
     if (!is_zero(desired_speed)) {
         Vector2f desired_vel_norm = desired_vel/desired_speed;
-        float drag_speed_delta = -_loiter_accel_cmss*nav_dt*desired_speed/gnd_speed_limit_cms;
+        float drag_speed_delta = -_loiter_accel_cmss * nav_dt * desired_speed/gnd_speed_limit_cms;
 
         if (_pilot_accel_fwd_cms == 0 && _pilot_accel_rgt_cms == 0) {
             drag_speed_delta = MIN(drag_speed_delta,MAX(-_loiter_accel_min_cmss*nav_dt, -2.0f*desired_speed*nav_dt));
@@ -305,6 +309,7 @@ void AC_WPNav::calc_loiter_desired_velocity(float nav_dt, float ekfGndSpdLimit)
     }
 
     // send adjusted feed forward velocity back to position controller
+    // equals to: _vel_desired = desired_vel, change the global value of desired velocity
     _pos_control.set_desired_velocity_xy(desired_vel.x,desired_vel.y);
 }
 
@@ -333,8 +338,12 @@ void AC_WPNav::update_loiter(float ekfGndSpdLimit, float ekfNavVelGainScaler)
         _pos_control.set_accel_xy(_loiter_accel_cmss);
         _pos_control.set_jerk_xy(_loiter_jerk_max_cmsss);
 
+        // Here, we get desired velocity from RC_input_pitch&roll
+        // the global varible: _vel_desired was adjusted after this function. 
         calc_loiter_desired_velocity(dt,ekfGndSpdLimit);
-        _pos_control.update_xy_controller(AC_PosControl::XY_MODE_POS_LIMITED_AND_VEL_FF, ekfNavVelGainScaler, true);
+        //_pos_control.update_xy_controller(AC_PosControl::XY_MODE_POS_LIMITED_AND_VEL_FF, ekfNavVelGainScaler, true);
+        // in XY_MODE_POS_AND_VEL_FF, we don't correlate the pos and don't need cur_pos
+        _pos_control.update_xy_controller(AC_PosControl::XY_MODE_POS_AND_VEL_FF, ekfNavVelGainScaler, true);
     }
 }
 

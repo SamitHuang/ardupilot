@@ -238,6 +238,8 @@ void GCS_MAVLINK::send_ahrs2(AP_AHRS &ahrs)
                                loc.lng);
     }
     AP_AHRS_NavEKF &_ahrs = reinterpret_cast<AP_AHRS_NavEKF&>(ahrs);
+    Vector3f vel_ned; 
+    _ahrs.get_velocity_NED(vel_ned);
     if (_ahrs.get_NavEKF2().activeCores() > 0 &&
         HAVE_PAYLOAD_SPACE(chan, AHRS3)) {
         _ahrs.get_NavEKF2().getLLH(loc);
@@ -249,7 +251,7 @@ void GCS_MAVLINK::send_ahrs2(AP_AHRS &ahrs)
                                loc.alt*1.0e-2f,
                                loc.lat,
                                loc.lng,
-                               0, 0, 0, 0);
+                               vel_ned.x, vel_ned.y, vel_ned.z, 0);
     }
 #endif
 }

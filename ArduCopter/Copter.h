@@ -628,7 +628,10 @@ private:
     static const AP_Param::Info var_info[];
     static const struct LogStructure log_structure[];
 
+    //my functions 
+    void vel_body_to_horizon(Vector3f vel_body, Vector3f &vel_hor);
     void TX1_send_loop(void);
+
     void compass_accumulate(void);
     void compass_cal_update(void);
     void barometer_accumulate(void);

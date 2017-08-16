@@ -839,7 +839,7 @@ void GCS_MAVLINK_Copter::handleMessage(mavlink_message_t* msg)
     uint8_t result = MAV_RESULT_FAILED;         // assume failure.  Each messages id is responsible for return ACK or NAK if required
 
     switch (msg->msgid) {
-
+    /*
     case MAVLINK_MSG_ID_VISION_SPEED_ESTIMATE:
     {
         mavlink_vision_speed_estimate_t speed;
@@ -848,6 +848,7 @@ void GCS_MAVLINK_Copter::handleMessage(mavlink_message_t* msg)
         //printf("%d", speed.x);
         break;
     }
+    */
 
 
     case MAVLINK_MSG_ID_HEARTBEAT:      // MAV ID: 0
@@ -2040,11 +2041,20 @@ void GCS_MAVLINK_Copter::handleMessage(mavlink_message_t* msg)
         break;
 
     case MAVLINK_MSG_ID_VISION_POSITION_DELTA:
+    {
 #if VISUAL_ODOMETRY_ENABLED == ENABLED
+        //mavlink_vision_position_delta_t vio;
+
+        //mavlink_msg_vision_position_delta_decode(msg, &vio);
+
+        //copter.gcs_send_text_fmt(MAV_SEVERITY_INFO,"delta ang[0]=%.2f, ", vio.angle_delta[0] );
         copter.g2.visual_odom.handle_msg(msg);
+        //save the msg to vio_state
+        copter.g2.visual_odom.save_vio_state(msg);
+
 #endif
         break;
-
+    }
     default:
         handle_common_message(msg);
         break;

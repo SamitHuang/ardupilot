@@ -103,7 +103,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(three_hz_loop,          3,     75),
     SCHED_TASK(compass_accumulate,   100,    100),
     SCHED_TASK(barometer_accumulate,  50,     90),
-    SCHED_TASK(TX1_send_loop,         1,     100),
+    SCHED_TASK(TX1_send_loop,         5,     100),
 #if PRECISION_LANDING == ENABLED
     SCHED_TASK(update_precland,      400,     50),
 #endif
@@ -189,9 +189,37 @@ void Copter::compass_accumulate(void)
     }
 }
 
+void Copter::vel_body_to_horizon(Vector3f vel_body, Vector3f &vel_hor){
+    Matrix3f dcm;
+    dcm.from_euler(ahrs.roll, ahrs.pitch, 0);
+    vel_hor = dcm * vel_body;
+}
+
 void Copter::TX1_send_loop()
 {
-    if (gcs_chan[2].initialised) {
+    //if (gcs_chan[2].initialised) {
+    if (gcs_chan[0].initialised) {
+        VisualOdomState_t vio_state = g2.visual_odom.get_vio_state();
+        static uint32_t last_update_ms = 0;
+        if(last_update_ms != vio_state.last_update_ms){
+            last_update_ms = vio_state.last_update_ms;
+
+            Vector3f vel_body, vel_hor;
+            vel_body = vio_state.position_delta * (1000000.0f/vio_state.time_delta_usec);
+
+            vel_body_to_horizon(vel_body, vel_hor);
+            mavlink_msg_local_position_ned_send(
+                MAVLINK_COMM_0,
+                AP_HAL::millis(),
+                vel_body.x,//local_position.x,
+                vel_body.y,//local_position.y,
+                vel_body.z,//local_position.z,
+                vel_hor.x,
+                vel_hor.y,
+                vel_hor.z);
+            //gcs_send_text_fmt(MAV_SEVERITY_INFO,"vio vel_fw=%.4f, vel_right=%.4f", vel_hor.x, vel_hor.y);
+        }   
+        //copter.gcs_send_text_fmt(MAV_SEVERITY_INFO,"inertial nav v0=%.2f, v1=%.2f, v2=%.2f ", vel.x, vel.y, vel.z );
         //gcs[2].TX1_data_stream_send();
         //gcs_chan[2].send_message(MSG_RAW_IMU1);
         //gcs_send_text(MAV_SEVERITY_INFO, "Come to TX1 send loop");
