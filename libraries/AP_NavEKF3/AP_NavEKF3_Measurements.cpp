@@ -108,6 +108,7 @@ void NavEKF3_core::readRangeFinder(void)
 
 void NavEKF3_core::writeBodyFrameOdom(float quality, const Vector3f &delPos, const Vector3f &delAng, float delTime, uint32_t timeStamp_ms, const Vector3f &posOffset)
 {
+
     // limit update rate to maximum allowed by sensor buffers and fusion process
     // don't try to write to buffer until the filter has been initialised
     if (((timeStamp_ms - bodyOdmMeasTime_ms) < frontend->sensorIntervalMin_ms) || (delTime < dtEkfAvg) || !statesInitialised) {
@@ -127,6 +128,8 @@ void NavEKF3_core::writeBodyFrameOdom(float quality, const Vector3f &delPos, con
     bodyOdmDataNew.velErr = minVelErr + (maxVelErr - minVelErr) * (1.0f - 0.01f * quality);
 
     storedBodyOdm.push(bodyOdmDataNew);
+
+//    hal.console->printf("bodyOdmDataNew pushed into storedBodyOdm\n");    
 
 }
 

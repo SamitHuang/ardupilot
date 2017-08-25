@@ -704,7 +704,6 @@ void NavEKF3::UpdateFilter(void)
     if (!core) {
         return;
     }
-
     imuSampleTime_us = AP_HAL::micros64();
 
     const AP_InertialSensor &ins = _ahrs->get_ins();
@@ -1128,6 +1127,7 @@ void NavEKF3::getFlowDebug(int8_t instance, float &varFlow, float &gndOffset, fl
 */
 void NavEKF3::writeBodyFrameOdom(float quality, const Vector3f &delPos, const Vector3f &delAng, float delTime, uint32_t timeStamp_ms, const Vector3f &posOffset)
 {
+    //hal.console->printf("NavEKF3::writeBodyFrameOdom pre\n");
     if (core) {
         for (uint8_t i=0; i<num_cores; i++) {
             core[i].writeBodyFrameOdom(quality, delPos, delAng, delTime, timeStamp_ms, posOffset);

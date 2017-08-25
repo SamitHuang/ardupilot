@@ -62,6 +62,10 @@
 #define EKF_TARGET_DT_MS 10.0
 #define EKF_TARGET_DT    0.01
 
+
+extern Vector3f ekf3_vel_output;
+
+
 class AP_AHRS;
 
 class NavEKF3_core

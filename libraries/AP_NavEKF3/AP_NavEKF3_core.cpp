@@ -12,6 +12,8 @@
 
 extern const AP_HAL::HAL& hal;
 
+Vector3f ekf3_vel_output;
+
 // constructor
 NavEKF3_core::NavEKF3_core(void) :
     stateStruct(*reinterpret_cast<struct state_elements *>(&statesArray)),
@@ -810,6 +812,7 @@ void NavEKF3_core::calcOutputStates()
         // update output state to corrected values
         outputDataNew = storedOutput[storedIMU.get_youngest_index()];
 
+        ekf3_vel_output = outputStates.velocity;
     }
 }
 

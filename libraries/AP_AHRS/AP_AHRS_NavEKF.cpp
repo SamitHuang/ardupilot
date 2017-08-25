@@ -81,6 +81,7 @@ void AP_AHRS_NavEKF::reset_gyro_drift(void)
 
 void AP_AHRS_NavEKF::update(bool skip_ins_update)
 {
+    //hal.console->printf("ahrs update start \n");
     // EKF1 is no longer supported - handle case where it is selected
     if (_ekf_type == 1) {
         _ekf_type.set(2);
@@ -601,6 +602,7 @@ bool AP_AHRS_NavEKF::have_inertial_nav(void) const
 // order. Must only be called if have_inertial_nav() is true
 bool AP_AHRS_NavEKF::get_velocity_NED(Vector3f &vec) const
 {
+
     switch (active_EKF_type()) {
     case EKF_TYPE_NONE:
         return false;
@@ -612,6 +614,7 @@ bool AP_AHRS_NavEKF::get_velocity_NED(Vector3f &vec) const
 
     case EKF_TYPE3:
         EKF3.getVelNED(-1,vec);
+        //hal.console->printf("Invertial Nav Get Vel from EKF3. \n"); 
         return true;
 
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
@@ -890,6 +893,7 @@ void AP_AHRS_NavEKF::get_relative_position_D_home(float &posD) const
 uint8_t AP_AHRS_NavEKF::ekf_type(void) const
 {
     uint8_t type = _ekf_type;
+
 #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
     if (type == EKF_TYPE_SITL) {
         return type;
@@ -928,6 +932,7 @@ AP_AHRS_NavEKF::EKF_TYPE AP_AHRS_NavEKF::active_EKF_type(void) const
 
     case 3: {
         // do we have an EKF3 yet?
+        //hal.console->printf("check ekf3 started? %d \n", _ekf3_started); 
         if (!_ekf3_started) {
             return EKF_TYPE_NONE;
         }

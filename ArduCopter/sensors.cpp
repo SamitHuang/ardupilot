@@ -484,8 +484,10 @@ void Copter::init_visual_odom()
 void Copter::update_visual_odom()
 {
 #if VISUAL_ODOMETRY_ENABLED == ENABLED
+    //hal.console->printf("ahrs writeBodyFrameOdom check: odom_enable=%d, update_ms=%d \n",g2.visual_odom.enabled(), g2.visual_odom.get_last_update_ms()); 
     // check for updates
     if (g2.visual_odom.enabled() && (g2.visual_odom.get_last_update_ms() != visual_odom_last_update_ms)) {
+        //hal.console->printf("ahrs writeBodyFrameOdom runing. \n");    
         visual_odom_last_update_ms = g2.visual_odom.get_last_update_ms();
         float time_delta_sec = g2.visual_odom.get_time_delta_usec() / 1000000.0f;
         ahrs.writeBodyFrameOdom(g2.visual_odom.get_confidence(),

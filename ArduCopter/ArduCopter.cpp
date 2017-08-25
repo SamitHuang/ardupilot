@@ -73,6 +73,7 @@
  */
 
 #include "Copter.h"
+#include  <AP_NavEKF3/AP_NavEKF3_core.h>
 
 #define SCHED_TASK(func, rate_hz, max_time_micros) SCHED_TASK_CLASS(Copter, &copter, func, rate_hz, max_time_micros)
 
@@ -103,7 +104,7 @@ const AP_Scheduler::Task Copter::scheduler_tasks[] = {
     SCHED_TASK(three_hz_loop,          3,     75),
     SCHED_TASK(compass_accumulate,   100,    100),
     SCHED_TASK(barometer_accumulate,  50,     90),
-    SCHED_TASK(TX1_send_loop,         5,     100),
+    SCHED_TASK(TX1_send_loop,         10,     100),
 #if PRECISION_LANDING == ENABLED
     SCHED_TASK(update_precland,      400,     50),
 #endif
@@ -208,16 +209,21 @@ void Copter::TX1_send_loop()
             vel_body = vio_state.position_delta * (1000000.0f/vio_state.time_delta_usec);
 
             vel_body_to_horizon(vel_body, vel_hor);
+
+            Vector3f ekf3_vel_plus_offset;
+            //ekf3_vel_plus_offset  = ekf3_vel_output + vel_offset, let's watch the difference from the curve
+            EKF3.getVelNED(0, ekf3_vel_plus_offset);
+
             mavlink_msg_local_position_ned_send(
                 MAVLINK_COMM_0,
                 AP_HAL::millis(),
                 vel_body.x,//local_position.x,
                 vel_body.y,//local_position.y,
                 vel_body.z,//local_position.z,
-                vel_hor.x,
-                vel_hor.y,
-                vel_hor.z);
-            //gcs_send_text_fmt(MAV_SEVERITY_INFO,"vio vel_fw=%.4f, vel_right=%.4f", vel_hor.x, vel_hor.y);
+                ekf3_vel_output.x,//vel_hor.x,PAPADIAS, Dimitris
+                ekf3_vel_plus_offset.x,//vel_hor.y,
+                ekf3_vel_output.y);//vel_hor.z);
+            
         }   
         //copter.gcs_send_text_fmt(MAV_SEVERITY_INFO,"inertial nav v0=%.2f, v1=%.2f, v2=%.2f ", vel.x, vel.y, vel.z );
         //gcs[2].TX1_data_stream_send();

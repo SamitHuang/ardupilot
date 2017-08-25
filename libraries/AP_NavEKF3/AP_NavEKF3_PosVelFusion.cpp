@@ -1449,7 +1449,7 @@ void NavEKF3_core::FuseBodyVel()
                     healthyFusion = false;
                 }
             }
-
+            //hal.console->printf("EKF3 is really running and calculating. healthy=%d\n",healthyFusion);    
             if (healthyFusion) {
                 // update the covariance matrix
                 for (uint8_t i= 0; i<=stateIndexLim; i++) {
@@ -1495,13 +1495,13 @@ void NavEKF3_core::SelectBodyOdomFusion()
     } else {
         bodyVelFusionDelayed = false;
     }
-
+    //hal.console->printf("check ekf3 odom fusion pre start 2. \n");
     // Check for data at the fusion time horizon
     if (storedBodyOdm.recall(bodyOdmDataDelayed, imuDataDelayed.time_ms)) {
 
         // start performance timer
         hal.util->perf_begin(_perf_FuseBodyOdom);
-
+        //hal.console->printf("check ekf3 odom fusion running. \n");
         // Fuse data into the main filter
         FuseBodyVel();
 
